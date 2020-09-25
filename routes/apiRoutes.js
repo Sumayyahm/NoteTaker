@@ -2,6 +2,8 @@ const fs = require("fs");
 const dbJSON = require("../db/db.json");
 var uniqid = require('uniqid');
 
+var allNotes = dbJSON;
+console.log(dbJSON);
 
 // ===============================================================================
 // ROUTING
@@ -11,7 +13,8 @@ module.exports = function(app) {
     // API GET Request
     // ---------------------------------------------------------------------------
     app.get("/api/notes", function(req, res) {
-        res.json(dbJSON);
+        console.log(dbJSON);
+        return res.send(allNotes);
       });
 
      // API POST Request
@@ -26,7 +29,6 @@ module.exports = function(app) {
             if(err){
                 console.log(err)
             }
-            let allNotes = JSON.parse(data);
             allNotes.push(newNote);
             fs.writeFile("./db/db.json", JSON.stringify(allNotes), (err) => {
                 if (err)
@@ -35,7 +37,9 @@ module.exports = function(app) {
                 }
                 console.log("Note has been saved!");
             });
+            res.send(allNotes);
         });
+        
     });
 
      // API DELETE Request
@@ -47,28 +51,17 @@ module.exports = function(app) {
             if(err){
                 console.log(err)
             }
-            let allNotes = JSON.parse(data);
+                     
+            allNotes = allNotes.filter(allNotes => allNotes.id != toDelID);
 
-            function deleteId(allNotes) {
-                for( let i=0; i < allNotes.length; i++)
-                {
-                    if(allNotes[i].id === toDelID)
-                    {
-                        return allNotes.splice(i,1);
-                    }
-                }
-                }
-            var notesAfterDeletion = deleteId(allNotes);
-
-            fs.writeFile("./db/db.json", JSON.stringify(notesAfterDeletion), (err) => {
+            fs.writeFile("./db/db.json", JSON.stringify(allNotes), (err) => {
                 if (err)
                 {
                     console.log(err);
                 }
-                res.json(notesAfterDeletion);
                 console.log("Note has been deleted!");
                });
+              res.send(allNotes);
         });
-    
     });
 }
